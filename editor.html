@@ -1,0 +1,57 @@
+<html>
+<textarea id="code"></textarea>
+<button id="saveFile">save File</button>
+<pre id="output"></pre>
+<select id="list">
+
+</select>
+
+<script>
+    fetch("/", { method: "GET" }).then(async resp => {
+        console.log(resp.status);
+        var list = String(await resp.text());
+        let select = document.querySelector("#list");
+        console.log(list)
+        list.split('\n').forEach(n => {
+            ///make html list
+            var option = document.createElement("option");
+            option.text = n;
+            option.value = n;
+            select.appendChild(option)
+        })
+
+    });
+
+    document.querySelector("#list").addEventListener("change", () => {
+        let code = document.querySelector("#code");
+        let filename = document.querySelector("#list").value;
+        let outputNode = document.querySelector("#output");
+
+        fetch(filename, { method: "GET" }).then(async resp => {
+            console.log(resp.status);
+            code.value = String(await resp.text());
+        });
+
+
+    })
+    document.querySelector("#saveFile").addEventListener("click", () => {
+        let code = document.querySelector("#code");
+        let filename = document.querySelector("#list").value;
+        let outputNode = document.querySelector("#output");
+        var body = code.value
+        fetch(filename, { method: "PUT", body }).then(async resp => {
+            console.log(resp.status);
+        });
+
+
+        try {
+            let result = Function(code)();
+            outputNode.innerText = String(result);
+        } catch (e) {
+            outputNode.innerText = "Error: " + e;
+        }
+    });
+</script>
+
+
+</html>
